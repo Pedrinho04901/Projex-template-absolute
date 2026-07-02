@@ -1,0 +1,18 @@
+# Bin?rios pesados (Bloqueia os execut?veis de quase 250MB)
+terraform.exe
+velero.exe
+kubeseal.exe
+
+# Ambiente Virtual do Python e caches
+.venv/
+__pycache__/
+*.pyc
+
+# Credenciais e arquivos locais de DR
+credentials-velero
+
+# Caches locais e estados do Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars

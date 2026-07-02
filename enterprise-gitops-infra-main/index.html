@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projex — Infraestrutura de Nuvem, DevOps e FinOps de Elite</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { background-color: #030504; color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .font-chakra { font-family: 'Chakra Petch', sans-serif; }
+        .font-mono { font-family: 'IBM Plex Mono', monospace; }
+        
+        /* Gradientes e Cores Projex */
+        .text-neon-green { color: #00FFAA; }
+        .text-neon-cyan { color: #00E5FF; }
+        .text-neon-purple { color: #7F00FF; }
+        
+        .bg-gradient-primary { background: linear-gradient(135deg, #00FFAA 0%, #00E5FF 100%); color: #001a12; }
+        .bg-gradient-purple { background: linear-gradient(135deg, rgba(127,0,255,0.9) 0%, rgba(0,229,255,0.6) 100%); }
+        
+        /* Estilos dos Cartões */
+        .glass-card { 
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 18px;
+        }
+        .glass-card-purple { 
+            background: linear-gradient(180deg, rgba(127,0,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(127,0,255,0.3); 
+            border-radius: 18px;
+            box-shadow: 0 0 40px -10px rgba(127,0,255,0.5); 
+        }
+        
+        /* Luzes de Fundo (Glow) */
+        .glow-bg {
+            position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,255,170,0.15) 0%, transparent 70%);
+            top: -200px; left: -200px; z-index: -1; pointer-events: none;
+        }
+        .glow-bg-purple {
+            position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(127,0,255,0.15) 0%, transparent 70%);
+            top: 20%; right: -200px; z-index: -1; pointer-events: none;
+        }
+
+        /* Animação de Entrada ao Rolar */
+        .appear-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .appear-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Animação Pulsante da Borda do Sentinela */
+        .sentinela-pulse {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 18px;
+            border: 2px solid #00FFAA;
+            animation: pulse-neon 2s infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes pulse-neon {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 170, 0.4), inset 0 0 5px rgba(0, 255, 170, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 170, 0.7), inset 0 0 10px rgba(0, 255, 170, 0.4); }
+            100% { box-shadow: 0 0 10px rgba(0, 255, 170, 0.4), inset 0 0 5px rgba(0, 255, 170, 0.2); }
+        }
+    </style>
+</head>
+<body class="antialiased relative">
+
+    <div class="glow-bg"></div>
+    <div class="glow-bg-purple"></div>
+
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 backdrop-blur-md bg-[#030504]/80 border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center gap-2 group">
+                <div class="w-8 h-8 rounded border-2 border-white/20 flex items-center justify-center group-hover:border-[#00FFAA] transition-colors">
+                    <div class="w-3 h-3 bg-[#00FFAA] rounded-sm"></div>
+                </div>
+                <span class="font-chakra font-bold text-lg sm:text-xl tracking-wider">PROJEX</span>
+            </a>
+
+            <div class="hidden lg:flex gap-8 items-center font-medium text-sm text-gray-400">
+                <a href="#" class="text-white hover:text-[#00E5FF] transition-colors">Home</a>
+                <a href="#sobre-nos" class="hover:text-[#00E5FF] transition-colors">Sobre Nós</a>
+                <a href="#planos" class="hover:text-[#00E5FF] transition-colors">Planos</a>
+                <a href="#suporte" class="hover:text-[#00E5FF] transition-colors">Central de Suporte</a>
+            </div>
+
+            <a href="https://wa.me/5511977944798" target="_blank" class="bg-gradient-primary px-5 py-2.5 sm:px-6 rounded-full font-chakra font-semibold text-xs sm:text-sm hover:scale-105 transition-transform flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,170,0.3)]">
+                <span class="hidden sm:inline">Agendar Demonstração</span>
+                <span class="sm:hidden">Agendar</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </nav>
+
+    <section class="appear-on-scroll pt-32 sm:pt-40 pb-16 sm:pb-20 px-4 sm:px-6 max-w-5xl mx-auto text-center relative mt-10 visible">
+        <div class="inline-flex items-center gap-2 border border-white/10 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 mb-6 sm:mb-8 bg-white/5">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#00FFAA]"></div>
+            <span class="font-mono text-[10px] sm:text-xs font-semibold tracking-widest text-gray-300 uppercase">Engenharia de Nuvem • DevOps • FinOps</span>
+        </div>
+
+        <h1 class="font-chakra text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-6">
+            Infraestrutura Kubernetes <br class="hidden sm:block">
+            com <span class="text-neon-green">Risco Zero</span> e Redução <br class="hidden sm:block">
+            de Custos em Nuvem
+        </h1>
+
+        <p class="text-gray-400 text-base sm:text-lg max-w-3xl mx-auto mb-10 leading-relaxed">
+            Arquitetura moderna com GitOps (ArgoCD) e autocura em tempo real para Fintechs, Insurtechs e SaaS. Protegemos sua operação 24/7 contra quedas e eliminamos o desperdício financeiro na AWS, Google Cloud ou Azure.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 sm:mb-20 w-full sm:w-auto">
+            <a href="https://wa.me/5511977944798" target="_blank" class="w-full sm:w-auto bg-gradient-primary px-8 py-4 rounded-full font-chakra font-bold text-[14px] sm:text-[15px] hover:scale-105 transition-transform flex justify-center items-center gap-2">
+                Falar com um Engenheiro de Elite <i class="fa-regular fa-comment-dots text-lg"></i>
+            </a>
+            <a href="#planos" class="w-full sm:w-auto border border-white/20 hover:border-white/50 bg-white/5 px-8 py-4 rounded-full font-chakra font-bold text-[14px] sm:text-[15px] text-center transition-all">
+                Ver Arquiteturas
+            </a>
+        </div>
+
+        <div class="glass-card bg-[#0a0a0a] py-6 sm:py-8 px-6 sm:px-12 max-w-4xl mx-auto w-full">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+                <div class="text-center sm:text-left">
+                    <div class="font-mono text-2xl sm:text-3xl font-bold text-[#00FFAA] mb-1">99.99%</div>
+                    <div class="font-mono text-[9px] sm:text-[10px] tracking-widest text-gray-500 uppercase">Uptime SLA</div>
+                </div>
+                <div class="text-center sm:text-left">
+                    <div class="font-mono text-2xl sm:text-3xl font-bold text-[#00E5FF] mb-1">−40%</div>
+                    <div class="font-mono text-[9px] sm:text-[10px] tracking-widest text-gray-500 uppercase">Fatura de Nuvem</div>
+                </div>
+                <div class="text-center sm:text-left">
+                    <div class="font-mono text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
+                    <div class="font-mono text-[9px] sm:text-[10px] tracking-widest text-gray-500 uppercase">Monitoramento</div>
+                </div>
+                <div class="text-center sm:text-left">
+                    <div class="font-mono text-2xl sm:text-3xl font-bold text-[#7F00FF] mb-1">&lt; 3min</div>
+                    <div class="font-mono text-[9px] sm:text-[10px] tracking-widest text-gray-500 uppercase">Autocura Média</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sobre-nos" class="appear-on-scroll py-16 sm:py-24 border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16 items-center">
+            <div>
+                <div class="font-mono text-xs font-semibold tracking-widest text-[#00FFAA] mb-4 uppercase text-center md:text-left">Quem Somos</div>
+                <h2 class="font-chakra text-3xl sm:text-4xl font-bold mb-6 text-center md:text-left">Célula Tática de <br class="hidden sm:block"> Engenharia de Elite</h2>
+                <div class="flex justify-center md:justify-start">
+                    <div class="inline-flex items-center gap-2 border border-white/10 rounded px-4 py-2 bg-white/5">
+                        <i class="fa-solid fa-stethoscope text-[#00FFAA] text-sm"></i>
+                        <span class="font-mono text-xs sm:text-sm font-medium">Liderada por Pedro Fortunato</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <p class="text-gray-400 leading-relaxed text-base sm:text-lg text-center md:text-left">
+                    A Projex não é uma agência tradicional cheia de intermediários, burocracias ou tickets de suporte demorados. Somos uma célula tática de engenharia de infraestrutura de nuvem de alta performance liderada por Pedro Fortunato. Atuamos como um parceiro estratégico de CTOs e CFOs, injetando automação pura, segurança de dados e resiliência diretamente na arquitetura central do seu negócio. Projetamos sistemas que escalam de forma invisível, se autocuram de madrugada e geram caixa para a sua empresa.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="telemetria" class="appear-on-scroll py-16 sm:py-24 border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16 sm:mb-20">
+                <div class="font-mono text-xs font-semibold tracking-widest text-gray-400 mb-4 uppercase">Telemetria & FinOps</div>
+                <h2 class="font-chakra text-3xl sm:text-4xl font-bold">Engenharia que você <br class="hidden sm:block"> enxerga em tempo real</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16 mb-20 sm:mb-24 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="inline-flex items-center gap-2 border border-[#00E5FF]/30 rounded-full px-4 py-1.5 bg-[#00E5FF]/10 mb-4 sm:mb-6">
+                        <i class="fa-solid fa-code-branch text-[#00E5FF] text-xs"></i>
+                        <span class="font-mono text-[10px] sm:text-xs font-medium text-[#00E5FF] tracking-wider uppercase">GitOps · ArgoCD</span>
+                    </div>
+                    <h3 class="font-chakra text-2xl sm:text-3xl font-bold mb-4">Esteira GitOps Automatizada com ArgoCD</h3>
+                    <p class="text-gray-400 leading-relaxed text-sm sm:text-base">
+                        Automatize suas implantações de Kubernetes. O ArgoCD monitora seu repositório Git e garante que o estado do cluster esteja sempre em sincronia com o código, eliminando erros manuais.
+                    </p>
+                </div>
+                <div class="rounded-xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl order-1 md:order-2">
+                    <img src="https://framerusercontent.com/images/qgU4e485cMgL6ukwbFQhhTcDdo.png" alt="ArgoCD Dashboard" class="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16 mb-20 sm:mb-24 items-center">
+                <div class="rounded-xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl order-1 md:order-1">
+                    <img src="https://framerusercontent.com/images/bq3oChDoTIhAxbHcTrItbq85wg.png" alt="FinOps Dashboard" class="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="order-2 md:order-2">
+                    <div class="inline-flex items-center gap-2 border border-[#00FFAA]/30 rounded-full px-4 py-1.5 bg-[#00FFAA]/10 mb-4 sm:mb-6">
+                        <i class="fa-solid fa-chart-line text-[#00FFAA] text-xs"></i>
+                        <span class="font-mono text-[10px] sm:text-xs font-medium text-[#00FFAA] tracking-wider uppercase">Engenharia de FinOps</span>
+                    </div>
+                    <h3 class="font-chakra text-2xl sm:text-3xl font-bold mb-4">Redução Real da Fatura de Nuvem com FinOps</h3>
+                    <p class="text-gray-400 leading-relaxed text-sm sm:text-base">
+                        O seu projeto se paga sozinho. Este dashboard mostra em tempo real a linha de "Requests Commitment" (o que a AWS te cobra) e o "CPU Usage" (o que seus usuários realmente usam). A Projex implementa Karpenter e auto-scaling inteligente para eliminar esse espaço em branco de desperdício, cortando sua fatura em até 40%.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16 mb-12 sm:mb-16 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="inline-flex items-center gap-2 border border-[#00E5FF]/30 rounded-full px-4 py-1.5 bg-[#00E5FF]/10 mb-4 sm:mb-6">
+                        <i class="fa-solid fa-satellite-dish text-[#00E5FF] text-xs"></i>
+                        <span class="font-mono text-[10px] sm:text-xs font-medium text-[#00E5FF] tracking-wider uppercase">Observabilidade 360°</span>
+                    </div>
+                    <h3 class="font-chakra text-2xl sm:text-3xl font-bold mb-4">Sala de Comando e Observabilidade 360°</h3>
+                    <p class="text-gray-400 leading-relaxed text-sm sm:text-base">
+                        Não pilote a sua empresa no escuro. Entregamos uma plataforma de telemetria avançada em tempo real com Grafana e Prometheus. Monitore latência, padrões de tráfego, saúde dos microsserviços e segurança de rede em um único link executivo no seu celular.
+                    </p>
+                </div>
+                <div class="rounded-xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl order-1 md:order-2">
+                    <img src="https://framerusercontent.com/images/qFPNDLS6uouAVtmuhCapaHfOSLs.png" alt="Grafana Dashboard" class="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity">
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto w-full mt-6">
+                <div class="glass-card p-6 sm:p-8 border border-[#00FFAA]/40 bg-[#00FFAA]/5 relative overflow-hidden shadow-[0_0_20px_rgba(0,255,170,0.1)]">
+                    <div class="sentinela-pulse"></div>
+
+                    <div class="flex justify-between items-center mb-5 relative z-20">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-shield-halved text-[#00FFAA] text-xl"></i>
+                            <span class="font-chakra font-bold text-xl text-white">Projex Sentinela</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/5 shadow-inner">
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#00FFAA] animate-pulse shadow-[0_0_10px_#00FFAA]"></div>
+                            <span class="font-mono text-xs text-gray-300">03:14</span>
+                        </div>
+                    </div>
+                    
+                    <p class="font-inter text-sm sm:text-base text-gray-300 leading-relaxed mb-6 relative z-20">
+                        Pico inesperado de requisições detectado às 03:14 no Gateway de Pagamentos. <span class="text-[#00E5FF] font-semibold">Autocura ativada.</span> Réplicas de servidores duplicadas automaticamente. Latência normalizada. <span class="text-[#00FFAA] font-semibold">Operação 100% segura.</span>
+                    </p>
+
+                    <div class="flex items-center gap-2 text-[#00FFAA] font-mono text-xs uppercase tracking-wider font-semibold relative z-20">
+                        <i class="fa-solid fa-check text-neon-green"></i> Incidente resolvido sem intervenção humana
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="planos" class="appear-on-scroll py-16 sm:py-24 border-t border-white/5 bg-[#020303]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10 sm:mb-12">
+                <div class="font-mono text-xs font-semibold tracking-widest text-[#00E5FF] mb-4 uppercase">Arquiteturas & Planos</div>
+                <h2 class="font-chakra text-3xl sm:text-4xl font-bold mb-4">Escolha o seu Modelo de Operação</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base">
+                    Alterne entre Copiloto (consultoria e setup único) e Piloto Automático (sustentação 24/7 gerenciada). Os planos abaixo atualizam preços e escopos automaticamente.
+                </p>
+            </div>
+
+            <div class="flex justify-center mb-12 sm:mb-16">
+                <div class="bg-white/5 border border-white/10 rounded-full p-1 flex w-full max-w-sm sm:w-auto">
+                    <button id="btn-copiloto" onclick="togglePricing('copiloto')" class="flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-full font-chakra font-bold text-xs sm:text-sm transition-all bg-gradient-primary text-gray-900">
+                        Modelo Copiloto
+                    </button>
+                    <button id="btn-piloto" onclick="togglePricing('piloto')" class="flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-full font-chakra font-bold text-xs sm:text-sm text-gray-400 transition-all hover:text-white bg-transparent">
+                        Piloto Automático
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="glass-card p-6 sm:p-8 flex flex-col relative group hover:border-white/20 transition-colors h-full">
+                    <div class="w-10 h-10 rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/30 flex items-center justify-center text-[#00E5FF] mb-6">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                    </div>
+                    <div class="font-mono text-[10px] tracking-widest text-[#00E5FF] uppercase mb-2">Custos & Auditoria</div>
+                    <h3 class="font-chakra text-lg sm:text-xl font-bold mb-4 text-neon-cyan">FinOps Essential</h3>
+                    <div class="mb-6">
+                        <span id="val-finops" class="font-mono text-2xl sm:text-3xl font-bold whitespace-nowrap text-white">R$ 4.500 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span></span>
+                    </div>
+                    <div class="inline-block border border-[#00E5FF]/30 bg-[#00E5FF]/10 rounded-full px-3 py-1 mb-6 text-center w-max">
+                        <span class="font-mono text-[9px] sm:text-[10px] text-[#00E5FF] uppercase tracking-wider font-semibold">Setup & Consultoria</span>
+                    </div>
+                    <p id="desc-finops" class="text-gray-400 text-xs sm:text-sm leading-relaxed mb-8 flex-grow">
+                        Auditoria profunda de desperdício, entrega dos códigos de limites de recursos, documentação técnica detalhada de boas práticas e 1 reunião técnica de alinhamento com a sua TI interna.
+                    </p>
+                    <a href="https://wa.me/5511977944798" target="_blank" class="w-full py-3 rounded-xl border border-white/10 bg-white/5 font-chakra font-semibold text-sm text-center hover:bg-white/10 transition-colors mt-auto">
+                        Falar com Engenheiro
+                    </a>
+                </div>
+
+                <div class="glass-card p-6 sm:p-8 flex flex-col relative group hover:border-white/20 transition-colors h-full">
+                    <div class="w-10 h-10 rounded-xl bg-[#00FFAA]/10 border border-[#00FFAA]/30 flex items-center justify-center text-[#00FFAA] mb-6">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="font-mono text-[10px] tracking-widest text-[#00FFAA] uppercase mb-2">Disponibilidade & Risco</div>
+                    <h3 class="font-chakra text-lg sm:text-xl font-bold mb-4 text-neon-green">SRE Resilience</h3>
+                    <div class="mb-6">
+                        <span id="val-sre" class="font-mono text-2xl sm:text-3xl font-bold whitespace-nowrap text-white">R$ 7.500 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span></span>
+                    </div>
+                    <div class="inline-block border border-[#00FFAA]/30 bg-[#00FFAA]/10 rounded-full px-3 py-1 mb-6 text-center w-max">
+                        <span class="font-mono text-[9px] sm:text-[10px] text-[#00FFAA] uppercase tracking-wider font-semibold">Setup & Consultoria</span>
+                    </div>
+                    <p id="desc-sre" class="text-gray-400 text-xs sm:text-sm leading-relaxed mb-8 flex-grow">
+                        Implantação completa do ecossistema GitOps (ArgoCD) e Service Mesh (Istio), manuais (Runbooks) instrucionais de novos deploys seguros e 1 reunião técnica de handover.
+                    </p>
+                    <a href="https://wa.me/5511977944798" target="_blank" class="w-full py-3 rounded-xl border border-white/10 bg-white/5 font-chakra font-semibold text-sm text-center hover:bg-white/10 transition-colors mt-auto">
+                        Falar com Engenheiro
+                    </a>
+                </div>
+
+                <div class="glass-card p-6 sm:p-8 flex flex-col relative group hover:border-white/20 transition-colors h-full">
+                    <div class="w-10 h-10 rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/30 flex items-center justify-center text-[#00E5FF] mb-6">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div class="font-mono text-[10px] tracking-widest text-[#00E5FF] uppercase mb-2">Segurança & Governança</div>
+                    <h3 class="font-chakra text-lg sm:text-xl font-bold mb-4 text-neon-cyan">SecOps & IaC</h3>
+                    <div class="mb-6">
+                        <span id="val-secops" class="font-mono text-2xl sm:text-3xl font-bold whitespace-nowrap text-white">R$ 11.000 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span></span>
+                    </div>
+                    <div class="inline-block border border-[#00E5FF]/30 bg-[#00E5FF]/10 rounded-full px-3 py-1 mb-6 text-center w-max">
+                        <span class="font-mono text-[9px] sm:text-[10px] text-[#00E5FF] uppercase tracking-wider font-semibold">Setup & Consultoria</span>
+                    </div>
+                    <p id="desc-secops" class="text-gray-400 text-xs sm:text-sm leading-relaxed mb-8 flex-grow">
+                        Entrega dos blueprints e templates estruturais em Terraform, manual completo de Disaster Recovery e 2 reuniões intensivas de treinamento de segurança com a sua equipe de TI.
+                    </p>
+                    <a href="https://wa.me/5511977944798" target="_blank" class="w-full py-3 rounded-xl border border-white/10 bg-white/5 font-chakra font-semibold text-sm text-center hover:bg-white/10 transition-colors mt-auto">
+                        Falar com Engenheiro
+                    </a>
+                </div>
+
+                <div class="glass-card-purple p-6 sm:p-8 flex flex-col relative group h-full overflow-hidden">
+                    <div class="absolute top-0 left-6 sm:left-8 bg-gradient-purple px-3 py-1 rounded-b-lg">
+                        <span class="font-mono text-[8px] sm:text-[9px] font-bold text-white tracking-widest">MAIS COMPLETO</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-[#7F00FF]/10 border border-[#7F00FF]/30 flex items-center justify-center text-[#7F00FF] mb-6 mt-6 sm:mt-4">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="font-mono text-[10px] tracking-widest text-[#7F00FF] uppercase mb-2">Combo de Elite</div>
+                    <h3 class="font-chakra text-lg sm:text-xl font-bold mb-4 text-neon-purple">Projex Absolute</h3>
+                    <div class="mb-6">
+                        <span id="val-absolute" class="font-mono text-2xl sm:text-3xl font-bold whitespace-nowrap text-white">R$ 22.000 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span></span>
+                    </div>
+                    <div class="inline-block border border-[#7F00FF]/30 bg-[#7F00FF]/10 rounded-full px-3 py-1 mb-6 text-center w-max">
+                        <span id="badge-absolute" class="font-mono text-[9px] sm:text-[10px] text-[#7F00FF] uppercase tracking-wider font-semibold">O Pacote Completo</span>
+                    </div>
+                    <p id="desc-absolute" class="text-gray-400 text-xs sm:text-sm leading-relaxed mb-8 flex-grow">
+                        Master Blueprint de toda a arquitetura de nuvem corporativa, documentação técnica total e unificada de todos os pilares e 1 Workshop estratégico de 4 horas gravado.
+                    </p>
+                    <a href="https://wa.me/5511977944798" target="_blank" class="w-full py-3 rounded-xl bg-gradient-primary font-chakra font-bold text-sm text-center shadow-[0_0_15px_rgba(0,255,170,0.2)] hover:scale-[1.02] transition-transform mt-auto text-gray-900">
+                        Falar com Engenheiro
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="suporte" class="appear-on-scroll py-16 sm:py-24 border-t border-white/5 relative overflow-hidden">
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-gradient-to-r from-[#00FFAA]/5 to-[#00E5FF]/5 blur-[100px] pointer-events-none rounded-full"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
+            <div class="font-mono text-xs font-semibold tracking-widest text-[#00FFAA] mb-4 uppercase">Sem Tickets ou Espera</div>
+            <h2 class="font-chakra text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Suporte de Engenharia Direto ao Ponto</h2>
+            <p class="text-gray-400 text-base sm:text-lg mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
+                Chega de robôs de atendimento irritantes ou filas de espera. Clientes Projex têm linha direta via chat em tempo real com engenheiros seniores.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 items-center">
+                <a href="https://wa.me/5511977944798" target="_blank" class="flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 sm:pr-12 transition-colors text-left w-full sm:w-auto hover:border-white/20">
+                    <div class="w-12 h-12 bg-[#00FFAA]/10 border border-[#00FFAA]/30 rounded-xl flex justify-center items-center text-[#00FFAA] text-xl shrink-0">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-chakra font-bold text-white mb-1">WhatsApp Linha Direta</h4>
+                        <p class="text-gray-400 text-xs sm:text-sm">Fale com um especialista</p>
+                    </div>
+                </a>
+
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=pedro04.fortunato@gmail.com" target="_blank" class="flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 sm:pr-12 transition-colors text-left w-full sm:w-auto hover:border-white/20">
+                    <div class="w-12 h-12 bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-xl flex justify-center items-center text-[#00E5FF] text-xl shrink-0">
+                        <i class="fa-regular fa-envelope"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-chakra font-bold text-white mb-1">E-mail Corporativo</h4>
+                        <p class="text-gray-400 text-xs sm:text-sm font-mono mt-1 break-all tracking-tight">pedro04.fortunato@gmail.com</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-white/5 bg-[#010101] pt-10 pb-8 appear-on-scroll h-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-between">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 border-b border-white/5 pb-8">
+                <div class="flex items-center gap-2 opacity-80">
+                    <div class="w-6 h-6 rounded border-2 border-white/20 flex items-center justify-center">
+                        <div class="w-2 h-2 bg-[#00FFAA] rounded-sm"></div>
+                    </div>
+                    <span class="font-chakra font-bold tracking-wider text-white">PROJEX</span>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500 font-medium">
+                    <a href="#" class="hover:text-white transition-colors">Termos de Uso</a>
+                    <a href="#" class="hover:text-white transition-colors">Política de Privacidade</a>
+                </div>
+            </div>
+            
+            <div class="text-center md:text-left text-[10px] sm:text-xs text-gray-600 font-medium h-full flex items-end">
+                © 2026 Projex. Todos os direitos reservados. Engenharia de Infraestrutura de Nuvem de Alta Disponibilidade.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Função de Toggle de Preço
+        function togglePricing(type) {
+            const copBtn = document.getElementById('btn-copiloto');
+            const pilBtn = document.getElementById('btn-piloto');
+            
+            const valFinops = document.getElementById('val-finops');
+            const valSre = document.getElementById('val-sre');
+            const valSecops = document.getElementById('val-secops');
+            const valAbsolute = document.getElementById('val-absolute');
+
+            const descFinops = document.getElementById('desc-finops');
+            const descSre = document.getElementById('desc-sre');
+            const descSecops = document.getElementById('desc-secops');
+            const descAbsolute = document.getElementById('desc-absolute');
+
+            const badgeAbsolute = document.getElementById('badge-absolute');
+
+            if(type === 'copiloto') {
+                copBtn.className = "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-full font-chakra font-bold text-xs sm:text-sm transition-all bg-gradient-primary text-gray-900";
+                pilBtn.className = "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-full font-chakra font-bold text-xs sm:text-sm text-gray-400 transition-all hover:text-white bg-transparent";
+
+                valFinops.innerHTML = 'R$ 4.500 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span>';
+                valSre.innerHTML = 'R$ 7.500 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span>';
+                valSecops.innerHTML = 'R$ 11.000 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span>';
+                valAbsolute.innerHTML = 'R$ 22.000 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">Taxa Única</span>';
+
+                badgeAbsolute.innerText = "O Pacote Completo";
+
+                descFinops.innerText = "Auditoria profunda de desperdício, entrega dos códigos de limites de recursos, documentação técnica detalhada de boas práticas e 1 reunião técnica de alinhamento com a sua TI interna.";
+                descSre.innerText = "Implantação completa do ecossistema GitOps (ArgoCD) e Service Mesh (Istio), manuais (Runbooks) instrucionais de novos deploys seguros e 1 reunião técnica avançada de handover.";
+                descSecops.innerText = "Entrega dos blueprints e templates estruturais em Terraform, manual completo de Disaster Recovery e 2 reuniões intensivas de treinamento de segurança com a sua equipe de TI.";
+                descAbsolute.innerText = "Master Blueprint de toda a arquitetura de nuvem corporativa, documentação técnica total e unificada de todos os pilares e 1 Workshop estratégico de 4 horas gravado.";
+            } else {
+                pilBtn.className = "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-full font-chakra font-bold text-xs sm:text-sm transition-all bg-gradient-primary text-gray-900";
+                copBtn.className = "flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-full font-chakra font-bold text-xs sm:text-sm text-gray-400 transition-all hover:text-white bg-transparent";
+
+                valFinops.innerHTML = 'R$ 3.800 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">/ mês</span>';
+                valSre.innerHTML = 'R$ 5.800 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">/ mês</span>';
+                valSecops.innerHTML = 'R$ 7.800 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">/ mês</span>';
+                valAbsolute.innerHTML = 'R$ 12.500 <span class="text-xs sm:text-sm font-medium text-gray-400 font-inter tracking-normal">/ mês</span>';
+
+                badgeAbsolute.innerText = "Gestão VIP 24/7";
+
+                descFinops.innerText = "Ajustes semanais automatizados de recursos, relatórios mensais de economia gerada, monitoramento contínuo de anomalias de faturamento e sustentação total dos custos.";
+                descSre.innerText = "Gerenciamento contínuo das esteiras GitOps, robô Sentinela ativo via WhatsApp/Slack, mitigação proativa e imediata de incidentes e monitoramento de performance 24/7.";
+                descSecops.innerText = "Manutenção do estado ativo do Terraform, rotação automatizada de segredos/chaves de APIs (Vault), auditoria de segurança contínua e testes simulados anuais de Disaster Recovery.";
+                descAbsolute.innerText = "O Santo Graal da engenharia. Sustentação, evolução de código e gerenciamento total de toda a infraestrutura por engenheiros seniores dedicados. Suporte VIP com linha direta via WhatsApp.";
+            }
+        }
+
+        // Função de Animação de Entrada ao Rolar
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.appear-on-scroll').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

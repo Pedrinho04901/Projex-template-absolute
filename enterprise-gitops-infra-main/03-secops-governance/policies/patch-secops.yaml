@@ -1,0 +1,11 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: app # Alinha com o nome do seu container de pagamentos
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: payment-db-secret
+              key: password
