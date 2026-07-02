@@ -12,6 +12,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   resources:
+    with:
     requests:
       storage: 10Gi
 ---
@@ -20,7 +21,7 @@ kind: Deployment
 metadata:
   namespace: velero
   name: minio
-  labels:                  # CORRIGIDO: Agora está dentro de metadata
+  labels:
     component: minio
 spec:
   strategy:
@@ -71,4 +72,4 @@ spec:
   - port: 9000
     targetPort: 9000
   selector:
-    component: minioExpand-Archive -Path "terraform.zip" -DestinationPath "." -Force
+    component: minio 
