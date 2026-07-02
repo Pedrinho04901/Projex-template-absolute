@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: nginxdemos/hello:plain
+        image: nginx:alpine
         ports:
         - containerPort: 80
         resources:
