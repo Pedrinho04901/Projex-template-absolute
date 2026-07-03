@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-internal-traffic
+  namespace: core-services
+spec:
+  podSelector: {} # 👈 O seletor vazio aplica a regra a ABSOLUTAMENTE TODOS os pods do namespace
+  policyTypes:
+  - Ingress # Bloqueia toda entrada de dados não autorizada
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-portal-to-postgres-only
+  namespace: core-services
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-db # 👈 Aplica esta regra de entrada especificamente no Banco de Dados
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: payment-portal # 👈 PERMITE ENTRADA APENAS se o tráfego vier do seu Portal Web legítimo
+    ports:
+    - protocol: TCP
+      port: 5432 # Libera estritamente a porta do PostgreSQL
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-istio-ingress-gateway
+  namespace: core-services
+spec:
+  podSelector:
+    matchLabels:
+      app: payment-portal # 👈 Aplica esta regra de entrada no seu Portal Web
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          istio-injection: enabled # 👈 PERMITE ENTRADA apenas se o tráfego vier da malha segura do Istio
+    ports:
+    - protocol: TCP
+      port: 80
