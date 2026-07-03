@@ -1,26 +1,17 @@
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: postgres-secret
+  name: postgres-service
   namespace: core-services
-type: Opaque
-stringData:
-  postgres-user: projex_admin
-  postgres-password: ProjexSecurePassword2026!
-  postgres-db: projex_portal_db
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-  namespace: core-services
+  labels:
+    app: postgres
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    with:
-    requests:
-      storage: 20Gi
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: postgres
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,54 +19,43 @@ metadata:
   name: postgres-db
   namespace: core-services
   labels:
-    app: postgres-db
+    app: postgres
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
-      app: postgres-db
+      app: postgres
   template:
     metadata:
       labels:
-        app: postgres-db
+        app: postgres
     spec:
       containers:
       - name: postgres
         image: postgres:15-alpine
-        # 👇 ATIVANDO A AUDITORIA INTERNA NÍVEL APPLE
-        args:
-          - "postgres"
-          - "-c"
-          - "shared_preload_libraries=pgaudit"
-          - "-c"
-          - "pgaudit.log=read, write, ddl" # Registra leituras, escritas e alterações de tabelas
-          - "-c"
-          - "pgaudit.log_client=on"
         ports:
         - containerPort: 5432
         env:
+        - name: POSTGRES_DB
+          value: "projex_db"
         - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-user
+          value: "postgres"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: postgres-secret
               key: postgres-password
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-db
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
         resources:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
           limits:
             cpu: "500m"
             memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
@@ -83,16 +63,3 @@ spec:
       - name: postgres-storage
         persistentVolumeClaim:
           claimName: postgres-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres-service
-  namespace: core-services
-spec:
-  type: ClusterIP
-  ports:
-  - port: 5432
-    targetPort: 5432
-  selector:
-    app: postgres-db
