@@ -1,0 +1,45 @@
+name: Projex Enterprise Licensing Authority
+
+on:
+  workflow_dispatch: # 👈 Ativa o painel de preenchimento manual no GitHub
+    inputs:
+      client_name:
+        description: 'Nome Oficial do Cliente Corporativo (Ex: BancoItaú)'
+        required: true
+        type: string
+      days_valid:
+        description: 'Dias de Validade da Licença (Ex: 365 para 1 ano)'
+        required: true
+        default: '365'
+        type: string
+
+jobs:
+  issue-license:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout do Código Master
+      uses: actions/checkout@v4
+
+    - name: Configurar Ambiente Python
+      uses: actions/actions-setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Instalar Dependências Criptográficas
+      run: |
+        pip install PyJWT cryptography
+
+    - name: Executar Motor de Assinatura Criptográfica
+      env:
+        CLIENT_NAME: ${{ github.event.inputs.client_name }}
+        DAYS_VALID: ${{ github.event.inputs.days_valid }}
+        PROJEX_PRIVATE_KEY: ${{ secrets.PROJEX_PRIVATE_KEY }} # 👈 Puxa sua chave secreta blindada
+      run: |
+        python utils-and-scripts/generate_license.py
+
+    - name: Disponibilizar Arquivo de Licença para Download (.LIC)
+      uses: actions/upload-artifact@v4
+      with:
+        name: projex-license-${{ github.event.inputs.client_name }}
+        path: projex.lic
+        retention-days: 5 # Mantém o download ativo por 5 dias antes de apagar por FinOps
