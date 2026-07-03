@@ -4,36 +4,50 @@ metadata:
   name: payment-service-v1
   namespace: core-services
   labels:
-    app: payment-service
+    app: payment-portal
     version: v1
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: payment-service
+      app: payment-portal
       version: v1
   template:
     metadata:
       labels:
-        app: payment-service
+        app: payment-portal
         version: v1
-        sidecar.istio.io/inject: "true"
     spec:
       containers:
-      - name: app
+      - name: portal-container
         image: nginx:alpine
         ports:
         - containerPort: 80
+        # 👇 CONEXÃO BLINDADA COM O BANCO DE DADOS
+        env:
+        - name: DB_HOST
+          value: "postgres-service.core-services.svc.cluster.local" # Endereço DNS interno do banco
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-db
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
         resources:
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
           requests:
             cpu: "100m"
             memory: "128Mi"
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 2
-          periodSeconds: 5
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
