@@ -6,7 +6,7 @@ metadata:
 type: Opaque
 stringData:
   postgres-user: projex_admin
-  postgres-password: ProjexSecurePassword2026!  # 👈 Altere para uma senha forte em produção
+  postgres-password: ProjexSecurePassword2026!
   postgres-db: projex_portal_db
 ---
 apiVersion: v1
@@ -18,8 +18,9 @@ spec:
   accessModes:
     - ReadWriteOnce
   resources:
+    with:
     requests:
-      storage: 20Gi  # Espaço inicial resiliente para milhões de transações
+      storage: 20Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -40,7 +41,16 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:15-alpine  # Versão leve, ultra segura e performática
+        image: postgres:15-alpine
+        # 👇 ATIVANDO A AUDITORIA INTERNA NÍVEL APPLE
+        args:
+          - "postgres"
+          - "-c"
+          - "shared_preload_libraries=pgaudit"
+          - "-c"
+          - "pgaudit.log=read, write, ddl" # Registra leituras, escritas e alterações de tabelas
+          - "-c"
+          - "pgaudit.log_client=on"
         ports:
         - containerPort: 5432
         env:
@@ -80,7 +90,7 @@ metadata:
   name: postgres-service
   namespace: core-services
 spec:
-  type: ClusterIP  # 👈 Garante que o banco NUNCA fique exposto para a internet
+  type: ClusterIP
   ports:
   - port: 5432
     targetPort: 5432
