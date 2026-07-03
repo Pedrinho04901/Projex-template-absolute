@@ -2,7 +2,7 @@ name: Projex Enterprise Cloud Deployment (Azure)
 
 on:
   push:
-    branches: [ main ] # Dispara o build na nuvem sempre que você der 'git push'
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -11,18 +11,18 @@ jobs:
     - name: Checkout do Código Mestre
       uses: actions/checkout@v4
 
-    # 1. Autenticação Criptografada na Nuvem Azure
+    # 1. Autenticação na Nuvem usando a versão mais recente e compatível com Node 24
     - name: Azure Login Contido
-      uses: azure/login@v2
+      uses: azure/login@v2.1.1 # 👈 Atualizado para compatibilidade nativa de runtime
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # 2. Compilação remota do Dockerfile DENTRO do Azure Registry (Sem usar sua CPU)
+    # 2. Compilação remota do Dockerfile DENTRO do Azure Registry (ACR)
     - name: Build Docker Remoto na Nuvem
       run: |
         az acr build --registry projexregistry --image projex-security-ia:v4 .
 
-    # 3. Sincronização Declarativa com o Cluster Kubernetes (AKS)
+    # 3. Sincronização com o Cluster Kubernetes (AKS)
     - name: Atualizar Cluster AKS Enterprise
       run: |
         az aks get-credentials --resource-group Projex-RG --name Projex-Cluster
