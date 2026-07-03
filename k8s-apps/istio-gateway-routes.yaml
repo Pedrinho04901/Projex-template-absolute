@@ -1,0 +1,32 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: portal-gateway
+  namespace: core-services
+spec:
+  selector:
+    istio: ingressgateway # Usa o gateway padrão do Istio instalado no cluster
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*" # Permite mapear para o seu domínio ou IP futuramente
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: portal-virtual-routes
+  namespace: core-services
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - portal-gateway
+  http:
+  - route:
+    - destination:
+        host: payment-service-v1.core-services.svc.cluster.local # Aponta internamente com mTLS para o portal
+        port:
+          number: 80
