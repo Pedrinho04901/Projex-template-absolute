@@ -1,3 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: projex-license-vault
+  namespace: core-services
+type: Opaque
+stringData:
+  # 👇 A Chave Pública que valida, mas não gera falsificações
+  projex-public-key.pem: |
+    -----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Ymx3Rl6X...
+    -----END PUBLIC KEY-----
+  # 👇 O Token Criptografado assinado por você contendo {expira: "2027-01-01", cliente: "EmpresaX"}
+  projex.lic: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.ZXhwaXJhX2RhdGE6IDIwMjYtMDctMDM..."
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,36 +33,58 @@ spec:
         app: payment-portal
         version: v1
     spec:
+      # ========================================================================
+      # 🔒 INIT CONTAINER: O GUARDASSONS CRIPTOGRÁFICO DO SEU MODELO DE NEGÓCIOS
+      # ========================================================================
+      initContainers:
+      - name: license-validator
+        image: python:3.11-alpine
+        command:
+        - "sh"
+        - "-c"
+        - |
+          cat << 'EOF' > /tmp/validate.py
+          import jwt
+          import datetime
+          import sys
+          
+          try:
+              # Lê a licença e a chave pública injetadas pelo Kubernetes
+              with open('/etc/license/projex.lic', 'r') as f:
+                  token = f.read().strip()
+              with open('/etc/license/projex-public-key.pem', 'r') as f:
+                  pub_key = f.read()
+              
+              # Valida a assinatura criptográfica e a data de expiração
+              decoded = jwt.decode(token, pub_key, algorithms=["RS256"])
+              exp_date = datetime.datetime.fromtimestamp(decoded['exp'])
+              
+              if datetime.datetime.now() > exp_date:
+                  print("❌ INADIMPLÊNCIA OU EXPIRAÇÃO DETECTADA: Licença Vencida!")
+                  sys.exit(1)
+                  
+              print("✅ Licença válida e assinada com sucesso. Liberando ambiente.")
+              sys.exit(0)
+          except Exception as e:
+              print(f"❌ FALHA CRÍTICA DE LICENCIAMENTO: {e}")
+              sys.exit(1)
+          EOF
+          python3 /tmp/validate.py
+        volumeMounts:
+        - name: license-volume
+          mountPath: /etc/license
+      # ========================================================================
+      # APLICAÇÃO PRINCIPAL (Só inicia se o script acima retornar Código 0)
+      # ========================================================================
       containers:
       - name: portal-container
         image: nginx:alpine
         ports:
         - containerPort: 80
-        # 👇 CONEXÃO BLINDADA COM O BANCO DE DADOS
-        env:
-        - name: DB_HOST
-          value: "postgres-service.core-services.svc.cluster.local" # Endereço DNS interno do banco
-        - name: DB_PORT
-          value: "5432"
-        - name: DB_NAME
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-db
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-user
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-password
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
+        volumeMounts:
+        - name: license-volume
+          mountPath: /etc/license
+      volumes:
+      - name: license-volume
+        secret:
+          secretName: projex-license-vault
