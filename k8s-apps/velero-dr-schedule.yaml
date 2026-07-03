@@ -1,0 +1,29 @@
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: projex-cloud-backup-location
+  namespace: core-monitoring # Gerenciado na fortaleza de monitoramento e controle
+spec:
+  provider: aws # O Velero usa a API do protocolo AWS S3 para conversar nativamente com o MinIO Enterprise
+  objectStorage:
+    bucket: projex-disaster-recovery-vault # O cofre forte de dados
+  config:
+    region: regional
+    s3ForcePathStyle: "true"
+    s3Url: http://minio-service.core-services.svc.cluster.local:9000 # Aponta internamente para o seu MinIO
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: postgres-db-daily-backup
+  namespace: core-monitoring
+spec:
+  schedule: "0 2 * * *" # 👈 Expressão Cron: Executa o backup automaticamente TODO DIA às 02h00 da manhã
+  template:
+    includedNamespaces:
+      - core-services # Foca na pasta mestre onde residem o Portal e o Banco de Dados
+    excludedResources:
+      - events
+    storageLocation: projex-cloud-backup-location
+    snapshotVolumes: true # 👈 Garante que o disco rígido do Postgres seja copiado por completo
+    ttl: 720h00m00s # FinOps: Apaga backups antigos automaticamente após 30 dias para poupar espaço
