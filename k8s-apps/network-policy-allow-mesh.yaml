@@ -1,0 +1,11 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: network-policy-allow-mesh
+  namespace: core-services
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - {} # 👈 Abre o tráfego de entrada para você conseguir acessar as portas
