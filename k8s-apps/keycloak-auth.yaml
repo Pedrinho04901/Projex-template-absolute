@@ -15,8 +15,14 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:latest
-        args: ["start-dev"]
+        image: bitnami/keycloak:latest
+        env:
+        - name: KEYCLOAK_CREATE_ADMIN_USER
+          value: "true"
+        - name: KEYCLOAK_ADMIN_USER
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "mudar123"
         resources:
           requests:
             cpu: "10m"
