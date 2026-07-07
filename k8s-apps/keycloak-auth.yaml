@@ -1,20 +1,8 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: keycloak-secret
-  namespace: core-services
-type: Opaque
-stringData:
-  keycloak-admin-user: projex_root
-  keycloak-admin-password: ProjexAdminPassword2026! # 👈 Senha master de segurança do painel
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
   namespace: core-services
-  labels:
-    app: keycloak
 spec:
   replicas: 1
   selector:
@@ -27,28 +15,15 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:24.0-alpine # Versão estável e ultra leve
-        args: ["start-dev"] # Modo otimizado para o nosso laboratório custo zero
-        env:
-        - name: KEYCLOAK_ADMIN
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-secret
-              key: keycloak-admin-user
-        - name: KEYCLOAK_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-secret
-              key: keycloak-admin-password
-        ports:
-        - containerPort: 8080
+        image: quay.io/keycloak/keycloak:latest
+        args: ["start-dev"]
         resources:
           requests:
-            cpu: "250m"
-            memory: "512Mi"
+            cpu: "10m"
+            memory: "64Mi"
           limits:
-            cpu: "500m"
-            memory: "1Gi"
+            cpu: "200m"
+            memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -56,7 +31,6 @@ metadata:
   name: keycloak-service
   namespace: core-services
 spec:
-  type: ClusterIP # Mantém o Keycloak protegido internamente
   ports:
   - port: 8080
     targetPort: 8080

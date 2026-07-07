@@ -1,26 +1,10 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: projex-license-vault
-  namespace: core-services
-type: Opaque
-stringData:
-  projex-public-key.pem: |
-    -----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Ymx3Rl6X...
-    -----END PUBLIC KEY-----
-  projex.lic: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.ZXhwaXJhX2RhdGE6IDIwMjYtMDctMDM..."
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: payment-service-v1
   namespace: core-services
-  labels:
-    app: payment-portal
-    version: v1
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: payment-portal
@@ -31,120 +15,26 @@ spec:
         app: payment-portal
         version: v1
     spec:
-      # ========================================================================
-      # 🔒 INIT CONTAINER: Validação Criptográfica de Contrato (Anti-Inadimplência)
-      # ========================================================================
-      initContainers:
-      - name: license-validator
-        image: python:3.11-alpine
-        command: ["sh", "-c", "python3 -c \"import sys; print('✅ Licença validada.'); sys.exit(0)\""]
-      
-      # ========================================================================
-      # ARQUITETURA MULTI-CONTAINER (DOCKER + KUBERNETES ENTERPRISE)
-      # ========================================================================
       containers:
-      # CONTAINER 1: O PORTAL WEB IMPLACÁVEL (Otimizado via FinOps)
-      - name: portal-container
-        image: nginx:alpine
-        ports:
-        - containerPort: 80
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true # Impede injeção de malware no sistema de arquivos em tempo de execução
-          runAsNonRoot: true
-          runAsUser: 10001
+      - name: payment-api
+        image: mockserver/mockserver:latest
         resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "300m"
-            memory: "256Mi"
-
-      # CONTAINER 2: GUARDIÃO IA - INSPEÇÃO DE PAYLOAD E ANOMALIAS (LGPD)
-      - name: lgpd-ai-shield
-        image: python:3.11-alpine
-        command:
-        - "sh"
-        - "-c"
-        - |
-          cat << 'EOF' > /tmp/lgpd_guard.py
-          import re
-          import sys
-          import logging
-          import time
-          
-          logging.basicConfig(level=logging.INFO, format='%(asctime)s [LGPD-AI-SHIELD]: %(message)s')
-          CPF_PATTERN = re.compile(r'\d{3}\.\d{3}\.\d{3}-\d{2}')
-          
-          logging.info("Motor de IA de conformidade LGPD ativo e monitorando payloads...")
-          while True:
-              # Lógica em malha inspecionando buffers compartilhados do Nginx
-              time.sleep(10)
-          EOF
-          python3 /tmp/lgpd_guard.py
-        resources:
-          requests:
-            cpu: "50m"
+            cpu: "10m"
             memory: "64Mi"
           limits:
-            cpu: "150m"
+            cpu: "100m"
             memory: "128Mi"
-
-      # CONTAINER 3: MOTOR IA DE CRIPTOGRAFIA HOMOMÓRFICA E ANONIMIZAÇÃO DINÂMICA
-      - name: ai-crypto-anonymizer
-        image: python:3.11-alpine
-        command:
-        - "sh"
-        - "-c"
-        - |
-          cat << 'EOF' > /tmp/anonymizer.py
-          import logging
-          import hashlib
-          import time
-          
-          logging.basicConfig(level=logging.INFO, format='%(asctime)s [AI-ANONYMIZER]: %(message)s')
-          logging.info("Core de Ofuscação Assimétrica e Pseudonimização LGPD Inicializado.")
-          
-          def tokenizar_dado_sensivel(valor, salt="ProjexSaltMaster2026"):
-              # Simulação de algoritmo de hash criptográfico e tokenização para blindagem de PII
-              return hashlib.sha256((valor + salt).encode()).hexdigest()
-              
-          while True:
-              time.sleep(10)
-          EOF
-          python3 /tmp/anonymizer.py
-        resources:
-          requests:
-            cpu: "80m"
-            memory: "96Mi"
-          limits:
-            cpu: "200m"
-            memory: "192Mi"
-
-      # CONTAINER 4: MOTOR IA DE COMPORTAMENTO FORENSE E DETECÇÃO DE VAZAMENTO (SIEM)
-      - name: ai-siem-data-guard
-        image: python:3.11-alpine
-        command:
-        - "sh"
-        - "-c"
-        - |
-          cat << 'EOF' > /tmp/siem_guard.py
-          import logging
-          import time
-          
-          logging.basicConfig(level=logging.INFO, format='%(asctime)s [AI-SIEM-GUARD]: %(message)s')
-          logging.info("Análise heurística de integridade de logs ativa (Padrão NASA Safety-Critical).")
-          
-          while True:
-              # Varre eventos anômalos e tentativas de exfiltração em lote de dados
-              time.sleep(10)
-          EOF
-          python3 /tmp/siem_guard.py
-        resources:
-          requests:
-            cpu: "60m"
-            memory: "80Mi"
-          limits:
-            cpu: "180m"
-            memory: "160Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service-v1
+  namespace: core-services
+spec:
+  ports:
+  - port: 80
+    targetPort: 1080
+  selector:
+    app: payment-portal
+    version: v1
