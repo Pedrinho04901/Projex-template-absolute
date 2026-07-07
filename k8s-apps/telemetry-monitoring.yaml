@@ -1,127 +1,10 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: core-monitoring
-  labels:
-    istio-injection: enabled # Garante que a telemetria também seja protegida por mTLS estrito do Istio
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-core-config
-  namespace: core-monitoring
-data:
-  prometheus.yml: |
-    global:
-      scrape_interval: 5s     # Resolução de altíssima fidelidade para detecção de anomalias por IA
-      evaluation_interval: 5s # Avaliação ultra-rápida de regras de alertas preditivos
-      scrape_timeout: 4s
-
-    rule_files:
-      - "/etc/prometheus/alert.rules.yml"
-
-    scrape_configs:
-      - job_name: 'kubernetes-apiserver'
-        kubernetes_sd_configs:
-          - role: endpoints
-        scheme: https
-        tls_config:
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-          insecure_skip_verify: true
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-
-      - job_name: 'kubernetes-nodes'
-        scheme: https
-        tls_config:
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-          insecure_skip_verify: true
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-        kubernetes_sd_configs:
-          - role: node
-
-      - job_name: 'kubernetes-cadvisor' # Coleta métricas de CPU/Memória brutas de cada container para FinOps
-        scheme: https
-        metrics_path: /metrics/cadvisor
-        tls_config:
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-          insecure_skip_verify: true
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-        kubernetes_sd_configs:
-          - role: node
-
-      - job_name: 'istio-mesh-telemetry' # Coleta dados de latência, tráfego e encriptação mTLS do Istio
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-            action: keep
-            regex: true
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-            action: replace
-            target_label: __metrics_path__
-            regex: (.+)
-          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            replacement: $1:$2
-            target_label: __address__
-
-      - job_name: 'postgres-database-metrics' # Coleta transações, locks e conexões ativas do banco
-        kubernetes_sd_configs:
-          - role: service
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_service_name]
-            action: keep
-            regex: postgres-service
-
-  alert.rules.yml: |
-    groups:
-      - name: ProjexPredictiveAlerts
-        rules:
-          - alert: KubePodCpuSpikePredictive
-            expr: container_cpu_usage_seconds_total{namespace="core-services"} > 0.85
-            for: 30s
-            labels:
-              severity: critical
-              tier: infrastructure
-            annotations:
-              summary: "Alerta Crítico: Uso de CPU acima do limite computacional seguro."
-              description: "O pod {{ $labels.pod }} está operando acima de 85% de CPU. Risco iminente de quebra de SLA."
-
-          - alert: PostgresAnomalousConnections
-            expr: pg_stat_database_numbackends > 100
-            for: 15s
-            labels:
-              severity: warning
-              tier: database
-            annotations:
-              summary: "Anomalia Detectada: Explosão de conexões simultâneas no banco de dados."
-              description: "O volume de conexões ativas ultrapassou o teto histórico de estabilidade. Possível ataque ou vazamento de pool."
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: prometheus-storage-pvc
-  namespace: core-monitoring
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Gi # Armazenamento robusto e persistente de séries temporais para o histórico de IA
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus-core
   namespace: core-monitoring
-  labels:
-    app: prometheus
-    tier: telemetry
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: prometheus
@@ -130,26 +13,19 @@ spec:
       labels:
         app: prometheus
     spec:
-      serviceAccountName: prometheus-sa # Vincula a conta com privilégios de leitura da API do cluster
       containers:
       - name: prometheus
-        image: prom/prometheus:v2.51.0 # Versão corporativa estável de longo termo
+        image: prom/prometheus:v2.45.0
         args:
-          - "--config.file=/etc/prometheus/prometheus.yml"
-          - "--storage.tsdb.path=/prometheus"
-          - "--storage.tsdb.retention.time=15d" # Retenção balanceada perfeita para análise preditiva semanal
-          - "--storage.tsdb.min-block-duration=2h"
-          - "--web.enable-lifecycle" # Permite hot-reload de configurações sem downtime
-        ports:
-        - containerPort: 9090
-          name: web
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus"
         resources:
           requests:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: "10m"
+            memory: "64Mi"
           limits:
-            cpu: "1000m"
-            memory: "2Gi"
+            cpu: "100m"
+            memory: "128Mi"
         volumeMounts:
         - name: config-volume
           mountPath: /etc/prometheus
@@ -160,94 +36,13 @@ spec:
         configMap:
           name: prometheus-core-config
       - name: storage-volume
-        persistentVolumeClaim:
-          claimName: prometheus-storage-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: prometheus-core-service
-  namespace: core-monitoring
-  labels:
-    app: prometheus
-spec:
-  type: ClusterIP
-  ports:
-  - port: 9090
-    targetPort: 9090
-    name: http-prometheus
-  selector:
-    app: prometheus
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: prometheus-sa
-  namespace: core-monitoring
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: prometheus-cluster-role
-rules:
-- apiGroups: [""]
-  resources: ["nodes", "nodes/metrics", "services", "endpoints", "pods", "namespaces"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["statefulsets", "deployments"]
-  verbs: ["get", "list", "watch"]
-- nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
-  verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: prometheus-cluster-role-binding
-subjects:
-- kind: ServiceAccount
-  name: prometheus-sa
-  namespace: core-monitoring
-roleRef:
-  kind: ClusterRole
-  name: prometheus-cluster-role
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: grafana-storage-pvc
-  namespace: core-monitoring
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi # Persistência imutável dos painéis customizados construídos para os clientes
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-datasources-config
-  namespace: core-monitoring
-data:
-  datasources.yaml: |
-    apiVersion: 1
-    datasources:
-      - name: Projex-Prometheus-Core
-        type: prometheus
-        access: proxy
-        url: http://prometheus-core-service.core-monitoring.svc.cluster.local:9090
-        isDefault: true
-        editable: false
+        emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana-enterprise
   namespace: core-monitoring
-  labels:
-    app: grafana
-    tier: visualizer
 spec:
   replicas: 1
   selector:
@@ -260,49 +55,17 @@ spec:
     spec:
       containers:
       - name: grafana
-        image: grafana/grafana-enterprise:10.4.1 # Edição Enterprise focada em auditoria corporativa e segurança
-        ports:
-        - containerPort: 3000
-          name: ui
-        env:
-        - name: GF_SECURITY_ADMIN_USER
-          value: "projex_global_ops"
-        - name: GF_SECURITY_ADMIN_PASSWORD
-          value: "ProjexUltraSecureTelemetry2026!#"
-        - name: GF_USERS_ALLOW_SIGN_UP
-          value: "false" # Blindagem contra criação de usuários maliciosos externos
-        - name: GF_ANALYTICS_REPORTING_ENABLED
-          value: "false"
+        image: grafana/grafana-enterprise:latest
         resources:
           requests:
-            cpu: "250m"
-            memory: "256Mi"
+            cpu: "10m"
+            memory: "64Mi"
           limits:
-            cpu: "500m"
-            memory: "1Gi"
+            cpu: "100m"
+            memory: "128Mi"
         volumeMounts:
-        - name: datasource-volume
-          mountPath: /etc/grafana/provisioning/datasources
-        - name: storage-volume
+        - name: grafana-storage
           mountPath: /var/lib/grafana
       volumes:
-      - name: datasource-volume
-        configMap:
-          name: grafana-datasources-config
-      - name: storage-volume
-        persistentVolumeClaim:
-          claimName: grafana-storage-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: grafana-enterprise-service
-  namespace: core-monitoring
-spec:
-  type: ClusterIP
-  ports:
-  - port: 3000
-    targetPort: 3000
-    name: http-ui
-  selector:
-    app: grafana
+      - name: grafana-storage
+        emptyDir: {}
