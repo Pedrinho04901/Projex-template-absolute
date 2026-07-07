@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  projex-public-key.pem: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEwWW14M1JsNlguLi4KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==
+  projex.lic: ZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LlpYaHdhWEpoWDJSaGRHRTZJREl3TWpZdE1EY3RNRE0uLi4=
+kind: Secret
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: projex-enterprise-apps:/Secret:core-services/projex-license-vault
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Secret","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"projex-enterprise-apps:/Secret:core-services/projex-license-vault"},"name":"projex-license-vault","namespace":"core-services"},"stringData":{"projex-public-key.pem":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Ymx3Rl6X...\n-----END PUBLIC KEY-----\n","projex.lic":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.ZXhwaXJhX2RhdGE6IDIwMjYtMDctMDM..."},"type":"Opaque"}
+  name: projex-license-vault
+  namespace: core-services
+type: Opaque
