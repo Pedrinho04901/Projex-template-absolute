@@ -38,6 +38,19 @@ spec:
       - name: storage-volume
         emptyDir: {}
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: core-monitoring
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -69,3 +82,17 @@ spec:
       volumes:
       - name: grafana-storage
         emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-enterprise
+  namespace: core-monitoring
+spec:
+  type: LoadBalancer
+  selector:
+    app: grafana
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
