@@ -69,9 +69,6 @@ spec:
       containers:
       - name: grafana
         image: grafana/grafana-enterprise:latest
-        env:
-        - name: GF_SERVER_SERVE_FROM_SUB_PATH
-          value: "true"
         resources:
           requests:
             cpu: "20m"
@@ -92,10 +89,10 @@ metadata:
   name: grafana-enterprise
   namespace: core-monitoring
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: grafana
   ports:
     - protocol: TCP
-      port: 3000
+      port: 80
       targetPort: 3000
