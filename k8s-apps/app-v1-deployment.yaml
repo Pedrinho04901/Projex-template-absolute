@@ -4,7 +4,7 @@ metadata:
   name: payment-service-v1
   namespace: core-services
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: payment-portal
