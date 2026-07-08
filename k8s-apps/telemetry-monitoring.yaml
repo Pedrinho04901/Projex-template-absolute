@@ -89,7 +89,7 @@ metadata:
   name: grafana-enterprise
   namespace: core-monitoring
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: grafana
   ports:
